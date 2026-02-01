@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>BookList</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>My Bookshelf</h1>
+    
+    <section id="add-book">
+      <h2>Add Book</h2>
+
+      <div class="modes">
+        <button id="manual-mode" class="active">Manual</button>
+        <button id="search-mode">Search</button>
+      </div>
+
+      <!-- Manual form -->
+      <form id="book-form">
+        <input type="text" id="title" placeholder="Title" required />
+        <input type="text" id="author" placeholder="Author" required />
+        <input type="url" id="cover" placeholder="Cover image URL (optional)" />
+        <button type="submit">Add</button>
+      </form>
+
+      <!-- Google search -->
+      <div id="search-form" hidden>
+        <input type="text" id="search-input" placeholder="Search books..." />
+        <button id="search-btn">Search</button>
+        <div id="search-results"></div>
+      </div>
+    </section>
+
+    <section id="bookshelf">
+      <h2>Books</h2>
+      <div id="book-list"></div>
+    </section>
+
+    <script src="script.js"></script>
+  </div>
+</body>
+</html>

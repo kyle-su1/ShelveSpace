@@ -1,0 +1,168 @@
+/* Basic reset */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: #f6f7fb;
+  color: #111;
+}
+
+/* Page layout */
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+h1 {
+  margin: 0 0 12px;
+  font-size: 32px;
+}
+
+section {
+  background: #fff;
+  border: 1px solid #e7e7ef;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 16px 0;
+}
+
+/* Form styling */
+#book-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+#book-form input {
+  padding: 10px 12px;
+  border: 1px solid #d9d9e3;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+#book-form button {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 10px;
+  background: #2f6fed;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#book-form button:hover {
+  filter: brightness(0.95);
+}
+
+/* Bookshelf grid */
+#book-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+/* Book card */
+.book-card {
+  border: 1px solid #e7e7ef;
+  border-radius: 12px;
+  padding: 12px;
+  background: #fafbff;
+  display: grid;
+  gap: 8px;
+}
+
+.book-cover {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #e7e7ef;
+  background: #fff;
+}
+
+
+.book-title {
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.book-author {
+  color: #444;
+  font-size: 14px;
+}
+
+/* Delete button */
+.book-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 6px;
+}
+
+.delete-btn {
+  border: 1px solid #e7e7ef;
+  background: #fff;
+  border-radius: 10px;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.delete-btn:hover {
+  background: #f2f2f7;
+}
+
+/* Responsive: stack form on small screens */
+@media (max-width: 600px) {
+  #book-form {
+    grid-template-columns: 1fr;
+  }
+
+  #book-form button {
+    width: 100%;
+  }
+}
+
+/* Search button and cards */
+.modes button.active {
+  font-weight: bold;
+}
+
+.search-card {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.search-card img {
+  width: 80px;
+}
+
+.book-card.finished {
+  opacity: 0.6;
+}
+
+.book-card.finished .book-title {
+  text-decoration: line-through;
+}
+
+.cover-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.checkmark {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 48px;
+  height: 48px;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  padding: 4px;
+}
