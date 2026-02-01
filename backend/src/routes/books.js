@@ -1,12 +1,12 @@
 import express from "express";
 import pool from "../db.js";
-
+import { authenticate } from "../middleware/auth.js";
 
 const GOOGLE_BOOKS_BASE = "https://www.googleapis.com/books/v1/volumes";
 
 const router = express.Router();
 
-// GET /books/search?q=...
+// GET /books/search?q=... (public)
 router.get("/search", async (req, res) => {
   const q = (req.query.q || "").toString().trim();
 
@@ -50,11 +50,13 @@ router.get("/search", async (req, res) => {
   }
 });
 
-
-// GET /books
-router.get("/", async (req, res) => {
+// GET /books (protected - only user's books)
+router.get("/", authenticate, async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM books");
+    const result = await pool.query(
+      "SELECT * FROM books WHERE user_id = $1 ORDER BY id ASC",
+      [req.user.id]
+    );
     res.json(result.rows);
   } catch (err) {
     console.error(err);
@@ -62,9 +64,8 @@ router.get("/", async (req, res) => {
   }
 });
 
-
-// POST /books
-router.post("/", async (req, res) => {
+// POST /books (protected)
+router.post("/", authenticate, async (req, res) => {
   const { title, author, cover } = req.body;
 
   if (!title || !author) {
@@ -72,26 +73,18 @@ router.post("/", async (req, res) => {
   }
 
   try {
-    // Check duplicate
-
-    /*
-    console.log("RAW BODY:", req.body);
-    console.log("TITLE/AUTHOR:", title, author);
-    */
-
     const dup = await pool.query(
-      "SELECT * FROM books WHERE title = $1 AND author = $2",
-      [title, author]
+      "SELECT * FROM books WHERE title = $1 AND author = $2 AND user_id = $3",
+      [title, author, req.user.id]
     );
 
     if (dup.rows.length > 0) {
       return res.status(400).json({ error: "Duplicate book" });
     }
 
-    // Insert
     const result = await pool.query(
-      "INSERT INTO books (title, author, cover) VALUES ($1, $2, $3) RETURNING *",
-      [title, author, cover || null]
+      "INSERT INTO books (user_id, title, author, cover) VALUES ($1, $2, $3, $4) RETURNING *",
+      [req.user.id, title, author, cover || null]
     );
 
     res.status(201).json(result.rows[0]);
@@ -101,8 +94,8 @@ router.post("/", async (req, res) => {
   }
 });
 
-// PATCH /books/:id
-router.patch("/:id", async (req, res) => {
+// PATCH /books/:id (protected)
+router.patch("/:id", authenticate, async (req, res) => {
   const id = Number(req.params.id);
   const { status } = req.body;
 
@@ -116,8 +109,8 @@ router.patch("/:id", async (req, res) => {
 
   try {
     const result = await pool.query(
-      "UPDATE books SET status = $1 WHERE id = $2 RETURNING *",
-      [status, id]
+      "UPDATE books SET status = $1 WHERE id = $2 AND user_id = $3 RETURNING *",
+      [status, id, req.user.id]
     );
 
     if (result.rowCount === 0) {
@@ -131,9 +124,8 @@ router.patch("/:id", async (req, res) => {
   }
 });
 
-
-// DELETE /books/:id
-router.delete("/:id", async (req, res) => {
+// DELETE /books/:id (protected)
+router.delete("/:id", authenticate, async (req, res) => {
   const id = Number(req.params.id);
 
   if (!Number.isInteger(id)) {
@@ -141,7 +133,10 @@ router.delete("/:id", async (req, res) => {
   }
 
   try {
-    const result = await pool.query("DELETE FROM books WHERE id = $1", [id]);
+    const result = await pool.query(
+      "DELETE FROM books WHERE id = $1 AND user_id = $2",
+      [id, req.user.id]
+    );
 
     if (result.rowCount === 0) {
       return res.status(404).json({ error: "Book not found" });
@@ -153,6 +148,5 @@ router.delete("/:id", async (req, res) => {
     res.status(500).json({ error: "Database error" });
   }
 });
-
 
 export default router;
