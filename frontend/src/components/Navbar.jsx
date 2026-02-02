@@ -16,6 +16,9 @@ function Navbar() {
       <div className="nav-links">
         {user ? (
           <>
+            <Link to="/" className="nav-link">Books</Link>
+            <Link to="/friends" className="nav-link">Friends</Link>
+            <Link to="/inbox" className="nav-link">Inbox</Link>
             <span className="nav-user">Hi, {user.username}</span>
             <button onClick={handleLogout} className="nav-btn">Log Out</button>
           </>
