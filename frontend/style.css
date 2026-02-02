@@ -166,3 +166,68 @@ section {
   border-radius: 50%;
   padding: 4px;
 }
+
+/* Auth section styling */
+#auth-section {
+  max-width: 400px;
+}
+
+#signup-form,
+#login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 16px;
+  border: 1px solid #e7e7ef;
+  border-radius: 10px;
+  background: #fafbff;
+}
+
+#signup-form h3,
+#login-form h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+#signup-form input,
+#login-form input {
+  padding: 10px 12px;
+  border: 1px solid #d9d9e3;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+#signup-form button,
+#login-form button {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 10px;
+  background: #2f6fed;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#signup-form button:hover,
+#login-form button:hover {
+  filter: brightness(0.95);
+}
+
+#logout-btn {
+  padding: 10px 14px;
+  border: 1px solid #e7e7ef;
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+#logout-btn:hover {
+  background: #f2f2f7;
+}
+
+#auth-message {
+  font-size: 14px;
+  font-weight: 500;
+}

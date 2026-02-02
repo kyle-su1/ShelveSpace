@@ -8,8 +8,31 @@
 <body>
   <div class="container">
     <h1>My Bookshelf</h1>
-    
-    <section id="add-book">
+
+    <!-- Auth -->
+    <section id="auth-section">
+      <h2>Account</h2>
+
+      <form id="signup-form">
+        <h3>Sign Up</h3>
+        <input type="email" id="signup-email" placeholder="Email" required />
+        <input type="text" id="signup-username" placeholder="Username" required />
+        <input type="password" id="signup-password" placeholder="Password" required />
+        <button type="submit">Sign Up</button>
+      </form>
+
+      <form id="login-form">
+        <h3>Log In</h3>
+        <input type="email" id="login-email" placeholder="Email" required />
+        <input type="password" id="login-password" placeholder="Password" required />
+        <button type="submit">Log In</button>
+      </form>
+
+      <button id="logout-btn" hidden>Log Out</button>
+      <div id="auth-message" style="margin-top: 8px;"></div>
+    </section>
+
+    <section id="add-book" hidden>
       <h2>Add Book</h2>
 
       <div class="modes">
@@ -33,7 +56,7 @@
       </div>
     </section>
 
-    <section id="bookshelf">
+    <section id="bookshelf" hidden>
       <h2>Books</h2>
       <div id="book-list"></div>
     </section>
