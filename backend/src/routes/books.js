@@ -6,33 +6,66 @@ const GOOGLE_BOOKS_BASE = "https://www.googleapis.com/books/v1/volumes";
 
 const router = express.Router();
 
-// GET /books/search?q=... (public)
-router.get("/search", async (req, res) => {
-  const q = (req.query.q || "").toString().trim();
+// helper: build a reliable Books API query
+function buildBooksQuery(raw) {
+  if (!raw) return "";
 
-  if (!q) {
+  // normalize whitespace + strip wrapping quotes
+  let q = raw
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/^"(.*)"$/, "$1")
+    .replace(/^'(.*)'$/, "$1");
+
+  // ISBN detection (10 or 13 digits, ignoring spaces/hyphens)
+  const digits = q.replace(/[-\s]/g, "");
+  if (/^\d{10}(\d{3})?$/.test(digits)) {
+    return `isbn:${digits}`;
+  }
+
+  // reliable fallback for text search
+  return `intitle:${q}`;
+}
+
+router.get("/search", async (req, res) => {
+  const rawQ = (req.query.q || "").toString();
+
+  // normalize early so empty/space-only queries get caught
+  const cleanedQ = rawQ.replace(/\s+/g, " ").trim();
+  if (!cleanedQ) {
     return res.status(400).json({ error: "Missing query parameter: q" });
   }
 
   try {
     const key = process.env.GOOGLE_BOOKS_API_KEY;
-    const url =
-      `${GOOGLE_BOOKS_BASE}?q=${encodeURIComponent(q)}` +
-      `&maxResults=12&printType=books` +
-      (key ? `&key=${encodeURIComponent(key)}` : "");
-
-    const resp = await fetch(url);
-    if (!resp.ok) {
-      return res.status(502).json({ error: "Google Books request failed" });
+    if (!key) {
+      return res.status(500).json({ error: "Server missing GOOGLE_BOOKS_API_KEY" });
     }
 
-    const data = await resp.json();
-    const items = Array.isArray(data.items) ? data.items : [];
+    const booksQ = buildBooksQuery(cleanedQ);
+
+    const url =
+      `${GOOGLE_BOOKS_BASE}?q=${encodeURIComponent(booksQ)}` +
+      `&maxResults=12&printType=books&langRestrict=en` +
+      `&key=${encodeURIComponent(key)}`;
+
+    const resp = await fetch(url);
+
+    const data = await resp.json().catch(() => null);
+
+    if (!resp.ok) {
+      console.error("[books/search] google failed:", resp.status, data);
+      return res.status(502).json({ error: "Google Books request failed", status: resp.status });
+    }
+
+    const items = Array.isArray(data?.items) ? data.items : [];
+
     const results = items.map((item) => {
       const info = item.volumeInfo || {};
       const imageLinks = info.imageLinks || {};
       let cover = imageLinks.thumbnail || imageLinks.smallThumbnail || null;
       if (cover && cover.startsWith("http://")) cover = cover.replace("http://", "https://");
+
       return {
         googleId: item.id || null,
         title: info.title || "Untitled",
