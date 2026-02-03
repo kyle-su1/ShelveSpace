@@ -15,7 +15,6 @@ router.get("/search", async (req, res) => {
   }
 
   try {
-    // key put in .env
     const key = process.env.GOOGLE_BOOKS_API_KEY;
     const url =
       `${GOOGLE_BOOKS_BASE}?q=${encodeURIComponent(q)}` +
@@ -45,7 +44,7 @@ router.get("/search", async (req, res) => {
 
     res.json(results);
   } catch (err) {
-    console.error(err);
+    console.error("Search error:", err);
     res.status(500).json({ error: "Search error" });
   }
 });
