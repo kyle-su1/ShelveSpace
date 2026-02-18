@@ -1,2 +1,2 @@
 # ShelveSpace
-Full-stack Bookshelf app with Node, PostgreSQL, Google Books API
+Full-stack Bookshelf app with Node, PostgreSQL on AWS RDS, Google Books API
