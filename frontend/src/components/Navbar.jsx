@@ -1,13 +1,20 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useNotification } from "../context/NotificationContext";
 
 function Navbar() {
   const { user, logout } = useAuth();
+  const { unreadCount, clearNotifications } = useNotification() || {};
   const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
     navigate("/login");
+  };
+
+  const handleBellClick = () => {
+    if (clearNotifications) clearNotifications();
+    navigate("/inbox");
   };
 
   return (
@@ -19,6 +26,16 @@ function Navbar() {
             <Link to="/" className="nav-link">Books</Link>
             <Link to="/friends" className="nav-link">Friends</Link>
             <Link to="/inbox" className="nav-link">Inbox</Link>
+            <button
+              className="notification-bell"
+              onClick={handleBellClick}
+              title="Notifications"
+            >
+              🔔
+              {unreadCount > 0 && (
+                <span className="notification-badge">{unreadCount}</span>
+              )}
+            </button>
             <span className="nav-user">Hi, {user.username}</span>
             <button onClick={handleLogout} className="nav-btn">Log Out</button>
           </>

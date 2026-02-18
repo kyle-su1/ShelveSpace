@@ -1,6 +1,7 @@
 import express from "express";
 import pool from "../db.js";
 import { authenticate } from "../middleware/auth.js";
+import { getSocketId } from "../socket.js";
 
 const router = express.Router();
 
@@ -131,6 +132,16 @@ router.post("/request", authenticate, async (req, res) => {
       [req.user.id, friendId]
     );
 
+    // Emit real-time notification to the friend
+    const io = req.app.get("io");
+    const targetSocketId = getSocketId(friendId);
+    if (targetSocketId) {
+      io.to(targetSocketId).emit("friend_request_received", {
+        from: req.user.username,
+        friendshipId: result.rows[0].id,
+      });
+    }
+
     res.status(201).json(result.rows[0]);
   } catch (err) {
     console.error(err);
@@ -153,6 +164,15 @@ router.patch("/:id/accept", authenticate, async (req, res) => {
 
     if (result.rowCount === 0) {
       return res.status(404).json({ error: "Request not found" });
+    }
+
+    // Notify the original requester that their request was accepted
+    const io = req.app.get("io");
+    const requesterSocketId = getSocketId(result.rows[0].user_id);
+    if (requesterSocketId) {
+      io.to(requesterSocketId).emit("friend_request_accepted", {
+        by: req.user.username,
+      });
     }
 
     res.json(result.rows[0]);

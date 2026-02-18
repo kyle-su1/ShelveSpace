@@ -1,6 +1,7 @@
 import express from "express";
 import pool from "../db.js";
 import { authenticate } from "../middleware/auth.js";
+import { getSocketId } from "../socket.js";
 
 const router = express.Router();
 
@@ -80,6 +81,17 @@ router.post("/", authenticate, async (req, res) => {
        RETURNING *`,
       [req.user.id, receiverId, title, author, cover || null, message || null]
     );
+
+    // Emit real-time notification to the receiver
+    const io = req.app.get("io");
+    const targetSocketId = getSocketId(receiverId);
+    if (targetSocketId) {
+      io.to(targetSocketId).emit("recommendation_received", {
+        from: req.user.username,
+        title,
+        recommendationId: result.rows[0].id,
+      });
+    }
 
     res.status(201).json(result.rows[0]);
   } catch (err) {

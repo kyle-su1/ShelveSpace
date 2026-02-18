@@ -27,6 +27,7 @@ function buildBooksQuery(raw) {
   return `intitle:${q}`;
 }
 
+// GET /books/search?q=
 router.get("/search", async (req, res) => {
   const rawQ = (req.query.q || "").toString();
 
