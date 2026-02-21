@@ -20,7 +20,7 @@ function Login() {
         setError(data.error);
         return;
       }
-      login(data.token, data.user);
+      login(data.token, data.user, data.refreshToken);
       navigate("/");
     } catch (err) {
       setError("Login failed. Please try again.");

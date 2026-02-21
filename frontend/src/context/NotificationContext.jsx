@@ -10,11 +10,11 @@ const SOCKET_URL = "http://localhost:3000";
 export function NotificationProvider({ children }) {
     const { user } = useAuth();
     const socketRef = useRef(null);
-    const [unreadCount, setUnreadCount] = useState(0);
+    const [friendsDot, setFriendsDot] = useState(false);
+    const [inboxDot, setInboxDot] = useState(false);
 
-    const clearNotifications = useCallback(() => {
-        setUnreadCount(0);
-    }, []);
+    const clearFriendsDot = useCallback(() => setFriendsDot(false), []);
+    const clearInboxDot = useCallback(() => setInboxDot(false), []);
 
     useEffect(() => {
         if (!user) {
@@ -22,7 +22,8 @@ export function NotificationProvider({ children }) {
                 socketRef.current.disconnect();
                 socketRef.current = null;
             }
-            setUnreadCount(0);
+            setFriendsDot(false);
+            setInboxDot(false);
             return;
         }
 
@@ -35,17 +36,17 @@ export function NotificationProvider({ children }) {
         });
 
         socket.on("friend_request_received", (data) => {
-            setUnreadCount((prev) => prev + 1);
+            setFriendsDot(true);
             toast.info(`${data.from} sent you a friend request!`);
         });
 
         socket.on("friend_request_accepted", (data) => {
-            setUnreadCount((prev) => prev + 1);
+            setFriendsDot(true);
             toast.success(`${data.by} accepted your friend request!`);
         });
 
         socket.on("recommendation_received", (data) => {
-            setUnreadCount((prev) => prev + 1);
+            setInboxDot(true);
             toast.info(`${data.from} recommended "${data.title}" to you!`);
         });
 
@@ -60,7 +61,7 @@ export function NotificationProvider({ children }) {
     }, [user]);
 
     return (
-        <NotificationContext.Provider value={{ unreadCount, clearNotifications }}>
+        <NotificationContext.Provider value={{ friendsDot, inboxDot, clearFriendsDot, clearInboxDot }}>
             {children}
         </NotificationContext.Provider>
     );

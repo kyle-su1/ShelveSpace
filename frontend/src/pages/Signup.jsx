@@ -26,7 +26,7 @@ function Signup() {
         setError(data.error);
         return;
       }
-      login(data.token, data.user);
+      login(data.token, data.user, data.refreshToken);
       navigate("/");
     } catch (err) {
       setError("Signup failed. Please try again.");

@@ -1,11 +1,16 @@
 const API_BASE = "http://localhost:3000";
 const TOKEN_KEY = "booklist_token";
-
+const REFRESH_KEY = "booklist_refresh_token";
 
 // Auth API
 export const getToken = () => localStorage.getItem(TOKEN_KEY);
 export const setToken = (token) => localStorage.setItem(TOKEN_KEY, token);
-export const clearToken = () => localStorage.removeItem(TOKEN_KEY);
+export const clearToken = () => {
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(REFRESH_KEY);
+};
+export const getRefreshToken = () => localStorage.getItem(REFRESH_KEY);
+export const setRefreshToken = (token) => localStorage.setItem(REFRESH_KEY, token);
 
 export async function apiFetch(path, options = {}) {
   const headers = { ...(options.headers || {}) };

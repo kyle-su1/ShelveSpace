@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { getToken, setToken as saveToken, clearToken } from "../api";
+import { getToken, setToken as saveToken, clearToken, setRefreshToken } from "../api";
 
 const AuthContext = createContext(null);
 
@@ -11,9 +11,20 @@ export function AuthProvider({ children }) {
     const token = getToken();
     if (token) {
       try {
-        // Decode JWT payload (middle part)
+        // Decode Cognito IdToken payload (middle part)
         const payload = JSON.parse(atob(token.split(".")[1]));
-        setUser({ id: payload.id, email: payload.email, username: payload.username });
+
+        // Check if token is expired
+        if (payload.exp * 1000 < Date.now()) {
+          clearToken();
+        } else {
+          setUser({
+            id: payload["custom:db_id"] ? parseInt(payload["custom:db_id"]) : null,
+            email: payload.email,
+            username: payload["preferred_username"] || payload.email,
+            sub: payload.sub,
+          });
+        }
       } catch {
         clearToken();
       }
@@ -21,8 +32,9 @@ export function AuthProvider({ children }) {
     setLoading(false);
   }, []);
 
-  const login = (token, userData) => {
+  const login = (token, userData, refreshToken) => {
     saveToken(token);
+    if (refreshToken) setRefreshToken(refreshToken);
     setUser(userData);
   };
 
