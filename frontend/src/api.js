@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:3000";
+const API_BASE = import.meta.env.DEV ? "http://localhost:3000" : "";
 const TOKEN_KEY = "booklist_token";
 const REFRESH_KEY = "booklist_refresh_token";
 
