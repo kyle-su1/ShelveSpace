@@ -22,7 +22,7 @@ function Navbar() {
 
   return (
     <nav className="navbar">
-      <Link to="/" className="nav-brand">BookList</Link>
+      <Link to="/" className="nav-brand">ShelveSpace</Link>
       <div className="nav-links">
         {user ? (
           <>
