@@ -1,6 +1,7 @@
 import express from "express";
 import pool from "../db.js";
 import { authenticate } from "../middleware/auth.js";
+import redisClient from "../redis.js";
 
 const GOOGLE_BOOKS_BASE = "https://www.googleapis.com/books/v1/volumes";
 
@@ -45,6 +46,24 @@ router.get("/search", async (req, res) => {
 
     const booksQ = buildBooksQuery(cleanedQ);
 
+    // Build a deterministic cache key from the normalized query
+    // e.g. "booksearch:isbn:9780545010221" or "booksearch:intitle:harry potter"
+    const cacheKey = `booksearch:${booksQ.toLowerCase()}`;
+
+    // --- Cache Check ---
+    try {
+      if (redisClient.isOpen) {
+        const cached = await redisClient.get(cacheKey);
+        if (cached) {
+          return res.set("X-Cache", "HIT").json(JSON.parse(cached));
+        }
+      }
+    } catch (cacheErr) {
+      // Redis error — proceed without cache
+      console.warn("Redis read error:", cacheErr.message);
+    }
+
+    // --- Cache Miss: fetch from Google Books API ---
     const url =
       `${GOOGLE_BOOKS_BASE}?q=${encodeURIComponent(booksQ)}` +
       `&maxResults=12&printType=books&langRestrict=en` +
@@ -76,7 +95,16 @@ router.get("/search", async (req, res) => {
       };
     });
 
-    res.json(results);
+    // --- Cache Write (24-hour TTL) ---
+    try {
+      if (redisClient.isOpen) {
+        await redisClient.set(cacheKey, JSON.stringify(results), { EX: 86400 });
+      }
+    } catch (cacheErr) {
+      console.warn("Redis write error:", cacheErr.message);
+    }
+
+    res.set("X-Cache", "MISS").json(results);
   } catch (err) {
     console.error("Search error:", err);
     res.status(500).json({ error: "Search error" });
