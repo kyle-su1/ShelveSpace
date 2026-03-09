@@ -52,7 +52,7 @@ router.get("/search", async (req, res) => {
 
     // --- Cache Check ---
     try {
-      if (redisClient.isOpen) {
+      if (redisClient.isReady) {
         const cached = await redisClient.get(cacheKey);
         if (cached) {
           return res.set("X-Cache", "HIT").json(JSON.parse(cached));
@@ -97,7 +97,7 @@ router.get("/search", async (req, res) => {
 
     // --- Cache Write (24-hour TTL) ---
     try {
-      if (redisClient.isOpen) {
+      if (redisClient.isReady) {
         await redisClient.set(cacheKey, JSON.stringify(results), { EX: 86400 });
       }
     } catch (cacheErr) {
